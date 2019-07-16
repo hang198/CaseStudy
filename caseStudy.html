@@ -97,7 +97,7 @@
         }
         gameBoard.clear();
         gameBoard.frameNo += 1;
-        if (gameBoard.frameNo == 1) {
+        if (gameBoard.frameNo == 1 || everyinterval(150)) {
             x = gameBoard.canvas.width;
             minHeight = 20;
             maxHeight = 200;
@@ -118,6 +118,11 @@
         box.newPos();
         box.update();
     }
+    function everyinterval(n) {
+        if ((gameBoard.frameNo / n) % 1 == 0) {return true;}
+        return false;
+    }
+
 
 
     function moveup() {
