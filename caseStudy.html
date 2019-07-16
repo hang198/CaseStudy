@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Funny Game</title>
+    <style>
+        canvas {
+            border: 1px solid mediumpurple;
+            background-color: yellow;
+        }
+
+        button {
+            color: black;
+            border: 1px solid red;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body onload="startGame();boxMove()">
+<script>
+
+    let box;
+    let theBar = [];
+    let score;
+
+    function startGame() {
+        box = new component(30, 30, "purple", 0, 150);
+        score = new component("20px", "Arial", "black", 350, 30, "text");
+        gameBoard.start();
+    }
+
+    let gameBoard = {
+        canvas: document.createElement("canvas"),
+        start: function () {
+            this.canvas.width = 500;
+            this.canvas.height = 300;
+            this.context = this.canvas.getContext("2d");
+            document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+            this.frameNo = 0;
+            this.interval = setInterval(updateGameArea, 20);
+        },
+        clear: function () {
+            this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        },
+        stop: function () {
+            clearInterval(this.interval);
+        }
+    };
+
+    function component(width, height, color, x, y, type) {
+        this.type = type;
+        this.width = width;
+        this.height = height;
+        this.speedX = 0;
+        this.speedY = 0;
+        this.x = x;
+        this.y = y;
+        this.update = function () {
+            ctx = gameBoard.context;
+            if (this.type == "text") {
+                ctx.font = this.width + " " + this.height;
+                ctx.fillStyle = color;
+                ctx.fillText(this.text, this.x, this.y);
+            } else {
+                ctx.fillStyle = color;
+                ctx.fillRect(this.x, this.y, this.width, this.height);
+            }
+        };
+        this.newPos = function () {
+            this.x += this.speedX;
+            this.y += this.speedY;
+        };
+        this.crashWith = function (otherobj) {
+            let myleft = this.x;
+            let myright = this.x + (this.width);
+            let mytop = this.y;
+            let mybottom = this.y + (this.height);
+            let otherleft = otherobj.x;
+            let otherright = otherobj.x + (otherobj.width);
+            let othertop = otherobj.y;
+            let otherbottom = otherobj.y + (otherobj.height);
+            let crash = true;
+            if ((mybottom < othertop) || (mytop > otherbottom) || (myright < otherleft) || (myleft > otherright)) {
+                crash = false;
+            }
+            return crash;
+        }
+    }
+
+    function updateGameArea() {
+        let x, height, gap, minHeight, maxHeight, minGap, maxGap;
+        for (let i = 0; i < theBar.length; i += 1) {
+            if (box.crashWith(theBar[i])) {
+                gameBoard.stop();
+                return;
+            }
+        }
+        gameBoard.clear();
+        gameBoard.frameNo += 1;
+        if (gameBoard.frameNo == 1) {
+            x = gameBoard.canvas.width;
+            minHeight = 20;
+            maxHeight = 200;
+            height = Math.floor(Math.random() * (maxHeight - minHeight + 1) + minHeight);
+            minGap = 50;
+            maxGap = 200;
+            gap = Math.floor(Math.random() * (maxGap - minGap + 1) + minGap);
+            theBar.push(new component(10, height, "blue", x, 0));
+            theBar.push(new component(10, x - height - gap, "blue", x, height + gap));
+        }
+        for (let i = 0; i < theBar.length; i += 1) {
+            theBar[i].speedX = -1;
+            theBar[i].newPos();
+            theBar[i].update();
+        }
+        score.text = "SCORE: " + gameBoard.frameNo;
+        score.update();
+        box.newPos();
+        box.update();
+    }
+
+
+    function moveup() {
+        box.speedY = -1;
+    }
+
+    function movedown() {
+        box.speedY = 1;
+    }
+
+    function moveleft() {
+        box.speedX = -1;
+    }
+
+    function moveright() {
+        box.speedX = 1;
+    }
+
+    function clearmove() {
+        box.speedX = 0;
+        box.speedY = 0;
+    }
+
+    function getMove(e) {
+        switch (e.keyCode) {
+            case 37:
+                moveleft();
+                break;
+            case  38:
+                moveup();
+                break;
+            case  39:
+                moveright();
+                break;
+            case 40:
+                movedown();
+                break;
+        }
+
+    }
+
+    function boxMove() {
+        window.addEventListener('keydown', getMove);
+    }
+
+    function replay() {
+        startGame();
+    }
+</script>
+<div style="text-align:center;width:480px;">
+    <button onmousedown="moveup()" onmouseup="clearmove()" ontouchstart="moveup()">UP</button>
+    <br><br>
+    <button onmousedown="moveleft()" onmouseup="clearmove()" ontouchstart="moveleft()">LEFT</button>
+    <button onmousedown="moveright()" onmouseup="clearmove()" ontouchstart="moveright()">RIGHT</button>
+    <br><br>
+    <button onmousedown="movedown()" onmouseup="clearmove()" ontouchstart="movedown()">DOWN</button>
+    <br><br>
+    <button onclick="replay()">Restart</button>
+</div>
+</body>
+</html>
